@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Share, HelpCircle, Info, Lightbulb } from 'lucide-react';
+import { ChevronDown, ChevronRight, Share, HelpCircle, Info, Lightbulb, MessageCircle, ShieldAlert } from 'lucide-react';
 import { Suggestion } from '../types';
 
 interface SuggestionCardProps {
   suggestion: Suggestion;
-  onSendToChat: (text: string) => void;
+  onSendToChat: (text: string, isExpandAction?: boolean) => void;
 }
 
 export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, onSendToChat }) => {
@@ -13,14 +13,16 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, onSe
   const getIcon = () => {
     switch (suggestion.type) {
       case 'question': return <HelpCircle className="w-4 h-4 text-purple-500" />;
+      case 'talking_point': return <MessageCircle className="w-4 h-4 text-orange-500" />;
       case 'answer': return <Lightbulb className="w-4 h-4 text-green-500" />;
-      case 'info': return <Info className="w-4 h-4 text-blue-500" />;
-      default: return null;
+      case 'fact_check': return <ShieldAlert className="w-4 h-4 text-red-500" />;
+      case 'clarifying_info': return <Info className="w-4 h-4 text-blue-500" />;
+      default: return <Info className="w-4 h-4 text-gray-500" />;
     }
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col transition-all">
+    <div className="shrink-0 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col transition-all">
       <button 
         onClick={() => setExpanded(!expanded)} 
         className="text-left w-full p-3 flex items-start gap-3 hover:bg-gray-50 focus:outline-none"
@@ -42,7 +44,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, onSe
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                onSendToChat(`[Context: ${suggestion.title}] ${suggestion.detail}`);
+                onSendToChat(`[Please expand on this suggestion]: ${suggestion.title} - ${suggestion.detail}`, true);
               }}
               className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md font-medium transition"
             >

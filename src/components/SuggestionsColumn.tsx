@@ -8,7 +8,7 @@ interface SuggestionsColumnProps {
   isGeneratingSuggestions: boolean;
   transcriptsLength: number;
   onRefresh: () => void;
-  onSendToChat: (text: string) => void;
+  onSendToChat: (text: string, isExpandAction?: boolean) => void;
 }
 
 export const SuggestionsColumn: React.FC<SuggestionsColumnProps> = ({

@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState, FormEvent } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '../types';
 
 interface ChatColumnProps {
   chatMessages: ChatMessage[];
+  isChatting: boolean;
   onSendToChat: (text: string) => void;
 }
 
-export const ChatColumn: React.FC<ChatColumnProps> = ({ chatMessages, onSendToChat }) => {
+export const ChatColumn: React.FC<ChatColumnProps> = ({ chatMessages, isChatting, onSendToChat }) => {
   const [chatInput, setChatInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -35,11 +37,18 @@ export const ChatColumn: React.FC<ChatColumnProps> = ({ chatMessages, onSendToCh
               msg.sender === 'bot' 
                 ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 text-blue-900 self-start rounded-tl-none' 
                 : 'bg-gray-100 text-gray-800 ml-auto self-end rounded-tr-none'
-            }`}
+            } leading-relaxed break-words`}
           >
-            {msg.text}
+            <ReactMarkdown>
+              {msg.text}
+            </ReactMarkdown>
           </div>
         ))}
+        {isChatting && (
+          <div className="p-3 rounded-lg text-sm w-5/6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 text-blue-900 self-start rounded-tl-none animate-pulse">
+            Thinking...
+          </div>
+        )}
         <div ref={chatEndRef} />
       </div>
       <div className="p-4 border-t border-gray-200 bg-gray-50">
@@ -48,12 +57,13 @@ export const ChatColumn: React.FC<ChatColumnProps> = ({ chatMessages, onSendToCh
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
+            disabled={isChatting}
             placeholder="Ask a question..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white disabled:opacity-50"
           />
           <button 
             type="submit"
-            disabled={!chatInput.trim()}
+            disabled={!chatInput.trim() || isChatting}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 text-sm font-medium"
           >
             Send
