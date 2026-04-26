@@ -1,4 +1,4 @@
-import React, { useState, FormEvent, useEffect } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { X, Settings as SettingsIcon } from 'lucide-react';
 import { AppSettings } from '../types';
 

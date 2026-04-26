@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Settings, Download, MessageSquare } from 'lucide-react';
 import { useMicrophone } from './hooks/useMicrophone';
 import { transcribeAudio } from './services/transcriptionService';

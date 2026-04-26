@@ -11,8 +11,8 @@ export function useMicrophone({ onChunkAvailable, chunkIntervalMs = 30000 }: Use
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const chunkIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const chunkIntervalRef = useRef<number | null>(null);
+  const timerIntervalRef = useRef<number | null>(null);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
