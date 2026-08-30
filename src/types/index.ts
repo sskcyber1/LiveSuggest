@@ -21,7 +21,6 @@ export interface ChatMessage {
 }
 
 export interface AppSettings {
-  apiKey: string;
   model: string;
   temperature: number;
   maxTokens: number;

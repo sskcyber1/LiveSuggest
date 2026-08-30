@@ -1,21 +1,16 @@
-export const transcribeAudio = async (audioBlob: Blob, apiKey: string): Promise<string | null> => {
-  if (!apiKey) return null;
-
+export const transcribeAudio = async (audioBlob: Blob): Promise<string | null> => {
   const formData = new FormData();
   formData.append('file', audioBlob, 'audio.webm');
-  formData.append('model', 'whisper-large-v3');
 
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+    const res = await fetch('/api/transcribe', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: formData
+      body: formData,
     });
 
     if (!res.ok) {
-      throw new Error(`Transcription failed: ${res.statusText}`);
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.error || `Transcription failed: ${res.statusText}`);
     }
 
     const data = await res.json();
