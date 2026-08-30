@@ -15,21 +15,13 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings>(() => {
     try {
       const saved = localStorage.getItem('appSettings');
-      const parsedUserApiKey = localStorage.getItem('apiKey');
-      
-      let initial = DEFAULT_SETTINGS;
-      if (saved) {
-        initial = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-      } else if (parsedUserApiKey) {
-        initial = { ...DEFAULT_SETTINGS, apiKey: parsedUserApiKey };
-      }
-      return initial;
+      return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SETTINGS;
     } catch {
       return DEFAULT_SETTINGS;
     }
   });
 
-  const [showSettings, setShowSettings] = useState(!settings.apiKey);
+  const [showSettings, setShowSettings] = useState(false);
   
   const [transcripts, setTranscripts] = useState<TranscriptItem[]>([]);
   const transcriptsRef = useRef<TranscriptItem[]>(transcripts);
@@ -50,12 +42,6 @@ export default function App() {
   const handleSendToChat = async (text: string, isExpandAction: boolean = false) => {
     if (!text.trim()) return;
 
-    if (!settings.apiKey) {
-      alert('Please set your API Key in Settings first to use the chat.');
-      setShowSettings(true);
-      return;
-    }
-    
     const newUserMessage: ChatMessage = { id: Date.now().toString(), text, sender: 'user', isExpand: isExpandAction };
     
     // Use functional state update to confidently get the newest list while simultaneously adding the current message to API payload
@@ -71,8 +57,7 @@ export default function App() {
           const promptToUse = isExpandAction ? settings.expandAnswerPrompt : settings.chatPrompt;
           
           const botReply = await sendChatMessage(
-            updatedMessages, 
-            settings.apiKey, 
+            updatedMessages,
             promptToUse,
             settings.model,
             settings.temperature,
@@ -91,14 +76,13 @@ export default function App() {
     });
   };
 
-  const generateNewSuggestions = useCallback(async (currentContext: string, currentKey: string, promptSetting: string) => {
-    if (!currentKey || !currentContext.trim()) return;
+  const generateNewSuggestions = useCallback(async (currentContext: string, promptSetting: string) => {
+    if (!currentContext.trim()) return;
 
     setIsGeneratingSuggestions(true);
     try {
       const newSuggestions = await generateSuggestions(
-        currentContext, 
-        currentKey, 
+        currentContext,
         promptSetting,
         settings.model,
         settings.temperature,
@@ -117,28 +101,27 @@ export default function App() {
   // for manual refresh suggestions transcript
   const manualRefreshSuggestions = useCallback(() => {
     const contextText = transcripts.slice(-settings.liveContextWindow).map(t => t.text).join('\n');
-    generateNewSuggestions(contextText, settings.apiKey, settings.liveSuggestionPrompt);
+    generateNewSuggestions(contextText, settings.liveSuggestionPrompt);
   }, [transcripts, settings, generateNewSuggestions]);
 
   // to display transcript as cards in the UI
   const processAudioChunk = useCallback(async (audioBlob: Blob) => {
-    if (!settings.apiKey) return;
     setIsTranscribing(true);
 
     try {
-      const text = await transcribeAudio(audioBlob, settings.apiKey);
+      const text = await transcribeAudio(audioBlob);
       if (text) {
         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
+
         const newTranscript = { id: Date.now().toString(), text, timestamp };
-        
+
         setTranscripts(prev => [...prev, newTranscript]);
 
         // Access the most recently updated transcripts including the current text
         const newTranscriptsContext = [...transcriptsRef.current, newTranscript];
         const contextText = newTranscriptsContext.slice(-settings.liveContextWindow).map(t => t.text).join('\n');
-        
-        generateNewSuggestions(contextText, settings.apiKey, settings.liveSuggestionPrompt);
+
+        generateNewSuggestions(contextText, settings.liveSuggestionPrompt);
       }
     } catch (e) {
       console.error('Failed to transcribe chunk:', e);
@@ -151,15 +134,6 @@ export default function App() {
     onChunkAvailable: processAudioChunk,
     chunkIntervalMs: settings.chunkIntervalMs || 30000
   });
-
-  const handleToggleRecording = () => {
-    if (!settings.apiKey) {
-      alert('Please set your API Key in Settings first.');
-      setShowSettings(true);
-      return;
-    }
-    toggleRecording();
-  };
 
   const handleSaveSettings = (newSettings: AppSettings) => {
     localStorage.setItem('appSettings', JSON.stringify(newSettings));
@@ -216,7 +190,7 @@ export default function App() {
           recordingTime={recordingTime}
           transcripts={transcripts}
           isTranscribing={isTranscribing}
-          onToggleRecording={handleToggleRecording}
+          onToggleRecording={toggleRecording}
         />
         <SuggestionsColumn 
           suggestions={suggestions}

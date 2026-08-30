@@ -10,7 +10,7 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ initialSettings, onClose, onSave }) => {
   const [settings, setSettings] = useState<AppSettings>(initialSettings);
-  const [activeTab, setActiveTab] = useState<'api' | 'prompts' | 'context'>('api');
+  const [activeTab, setActiveTab] = useState<'prompts' | 'context'>('prompts');
 
   // Handle local state updates
   const handleChange = (field: keyof AppSettings, value: string | number) => {
@@ -38,14 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ initialSettings, o
 
         {/* Custom Tabs */}
         <div className="flex gap-4 border-b border-gray-200 mb-6 shrink-0">
-          <button 
-            type="button"
-            className={`pb-2 px-1 font-medium text-sm transition-colors ${activeTab === 'api' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setActiveTab('api')}
-          >
-            API Key
-          </button>
-          <button 
+          <button
             type="button"
             className={`pb-2 px-1 font-medium text-sm transition-colors ${activeTab === 'prompts' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab('prompts')}
@@ -63,23 +56,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ initialSettings, o
 
         <form className="flex-1 flex flex-col overflow-hidden" onSubmit={handleSubmit}>
           <div className="flex-1 overflow-y-auto pr-2 pb-4">
-            {activeTab === 'api' && (
-              <div className="max-w-md">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Groq API Key</label>
-                  <input 
-                    type="password" 
-                    required
-                    value={settings.apiKey}
-                    onChange={(e) => handleChange('apiKey', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="gsk_..."
-                  />
-                  <p className="text-xs text-gray-500 mt-2">Required to generate transcripts, chat responses, and live suggestions.</p>
-                </div>
-              </div>
-            )}
-
             {activeTab === 'prompts' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
                 <div className="flex flex-col h-full">
@@ -112,7 +88,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ initialSettings, o
             )}
 
             {activeTab === 'context' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Model</label>
+                  <input
+                    type="text"
+                    required
+                    value={settings.model}
+                    onChange={(e) => handleChange('model', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                    placeholder="openai/gpt-oss-120b"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">Any Groq-hosted chat model ID.</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Audio Chunk Interval (ms)</label>
+                  <input
+                    type="number"
+                    min={5000} max={120000} step={1000}
+                    value={settings.chunkIntervalMs}
+                    onChange={(e) => handleChange('chunkIntervalMs', parseInt(e.target.value, 10))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">How often the mic audio is batched and transcribed.</p>
+                </div>
+
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Suggestions Context (chunks)</label>
                   <input 

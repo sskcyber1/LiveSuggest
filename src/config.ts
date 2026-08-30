@@ -1,7 +1,6 @@
 import { AppSettings } from './types';
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  apiKey: '',
   model: 'openai/gpt-oss-120b',
   temperature: 0.85,
   maxTokens: 512,
